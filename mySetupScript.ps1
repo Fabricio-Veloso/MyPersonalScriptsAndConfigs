@@ -55,52 +55,49 @@ function Install-Obsidian     { Install-WithWinget "Obsidian.Obsidian" "Obsidian
 
 # Instalar e configurar AutoHotkey
 function Install-AutoHotkey {
+    # Verifica se o AutoHotkey está instalado
+
     $ahkInstalled = Get-Command "AutoHotkey64.exe" -ErrorAction SilentlyContinue
+
     if (-not $ahkInstalled) {
         Install-WithWinget "AutoHotkey.AutoHotkey" "AutoHotkey"
     } else {
-        Write-Host "[OK] AutoHotkey ja esta instalado."
+        Write-Host "[OK] AutoHotkey já está instalado."
     }
 
-    $configurar = Read-Host "Deseja configurar o AutoHotkey com sua configuracao padrao? (y/n)"
+    $configurar = Read-Host "Deseja configurar o AutoHotkey com sua configuração padrão? (y/n)"
     if ($configurar -eq 'y') {
         Ensure-GitInstalled
         if (-not (Test-Path $caminhoRepoAHK)) {
             git clone $repoAHK $caminhoRepoAHK
-            Write-Host "[OK] Repositorio clonado em: $caminhoRepoAHK"
+            Write-Host "[OK] Repositório clonado em: $caminhoRepoAHK"
         } else {
-            Write-Host "[INFO] Repositorio ja existe em: $caminhoRepoAHK"
+            Write-Host "[INFO] Repositório já existe em: $caminhoRepoAHK"
         }
 
         $executar = Read-Host "Deseja ativar o script AutoHotkey agora? (y/n)"
         if ($executar -eq 'y') {
-            $scriptAHK = "$caminhoRepoAHK\testescript.ahk"
-            if (Test-Path $scriptAHK) {
-                $ahkExe = Get-Command "AutoHotkey.exe" -ErrorAction SilentlyContinue
-                if ($ahkExe) {
-                    Start-Process $ahkExe.Source -ArgumentList "`"$scriptAHK`""
-                    Write-Host "[OK] Script AHK executado."
-                } else {
-                    Write-Host "[ERRO] AutoHotkey.exe nao encontrado no sistema."
-                }
-            } else {
-                Write-Host "[ERRO] Script AHK nao encontrado em '$scriptAHK'."
-            }
+            $scriptAHK = Join-Path $caminhoRepoAHK "testescript.ahk"
+          if (Test-Path $scriptAHK) {
+              Start-Process $scriptAHK
+              Write-Host "[OK] Script AHK executado diretamente."
+          } else {
+              Write-Host "[ERRO] Script AHK não encontrado em '$scriptAHK'."
+          }
+
         }
 
-        $iniciarComSistema = Read-Host "Deseja adicionar o script AHK na inicializacao do sistema? (y/n)"
+        $iniciarComSistema = Read-Host "Deseja adicionar o script AHK na inicialização do sistema? (y/n)"
         if ($iniciarComSistema -eq 'y') {
-            $atalhoPath = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\AutoHotkey - Meu Script.lnk"
+            $startupFolder = [Environment]::GetFolderPath("Startup")
+            $atalhoPath = Join-Path $startupFolder "AutoHotkey - Meu Script.lnk"
             $wshell = New-Object -ComObject WScript.Shell
             $shortcut = $wshell.CreateShortcut($atalhoPath)
-            $shortcut.TargetPath = $ahkExe.Source
-            # Corrigido: concatenacao de string evita erro de parsing
-            $shortcut.Arguments = '"' + $caminhoRepoAHK + '\testescript.ahk"'
+            $shortcut.TargetPath = $scriptAHK
             $shortcut.Save()
-            Write-Host "[OK] Script AHK adicionado na inicializacao com o nome 'AutoHotkey - Meu Script'."
+            Write-Host "[OK] Script AHK adicionado na inicialização com o nome 'AutoHotkey - Meu Script'."
         }
-    }
-}
+    }}
 
 # Instalar dependencias dentro do WSL
 function Install-WSL-Dependencies {
