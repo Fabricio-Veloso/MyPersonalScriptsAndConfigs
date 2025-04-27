@@ -65,14 +65,14 @@ function Install-AutoHotkey {
         Write-Host "[OK] AutoHotkey já está instalado."
     }
 
-    $configurar = Read-Host "Deseja configurar o AutoHotkey com sua configuração padrão? (y/n)"
+    $configurar = Read-Host "Deseja configurar o AutoHotkey com sua configuracao padrao? (y/n)"
     if ($configurar -eq 'y') {
         Ensure-GitInstalled
         if (-not (Test-Path $caminhoRepoAHK)) {
             git clone $repoAHK $caminhoRepoAHK
-            Write-Host "[OK] Repositório clonado em: $caminhoRepoAHK"
+            Write-Host "[OK] Repositorio clonado em: $caminhoRepoAHK"
         } else {
-            Write-Host "[INFO] Repositório já existe em: $caminhoRepoAHK"
+            Write-Host "[INFO] Repositorio ja existe em: $caminhoRepoAHK"
         }
 
         $executar = Read-Host "Deseja ativar o script AutoHotkey agora? (y/n)"
