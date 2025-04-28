@@ -47,8 +47,30 @@ function Ensure-GitInstalled {
     }
 }
 
+# Instala neovim no wsl
+function Install-Neovim       {
+    Install-WSL-Dependencies
+    
+    echo 'Instalando Neovim versão > 0.10...'
+    # Adicionar repositório oficial do Neovim
+    sudo apt install -y software-properties-common
+    sudo add-apt-repository ppa:neovim-ppa/unstable -y
+    sudo apt update
+    sudo apt install -y neovim
+
+    echo 'Instalando Luarocks...'
+    sudo apt install -y luarocks
+
+    echo 'Preparando estrutura do Neovim...'
+    mkdir -p ~/.config
+    rm -rf ~/.config/nvim
+
+    echo 'Clonando configuração do usuário Fabricio...'
+    git clone --depth 1 https://github.com/Fabricio-Veloso/nvim.git ~/.config/nvim
+    echo 'Setup finalizado! Agora é só abrir o nvim :)'
+}
+
 # Instalacao com winget
-function Install-Neovim       { Install-WithWinget "Neovim.Neovim" "Neovim" }
 function Install-Git          { Install-WithWinget "Git.Git" "Git" }
 function Install-GoogleDrive  { Install-WithWinget "Google.Drive" "Google Drive" }
 function Install-Obsidian     { Install-WithWinget "Obsidian.Obsidian" "Obsidian" }
