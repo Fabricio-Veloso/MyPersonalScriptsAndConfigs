@@ -14,16 +14,6 @@
 
 - Em Linux: Instalar o PowerShell usando install-pwsh.sh
 
-## Como usar
-
-### 1.Powershell para interagir com WSL e windows.
-
-Dentro do PowerShell, execute:
-
-```
-Set-ExecutionPolicy Bypass -Scope Process -Force .\setup.ps1
-```
-
 🔥 Funções disponíveis no projeto
 
 - Instalar:
@@ -37,6 +27,16 @@ Set-ExecutionPolicy Bypass -Scope Process -Force .\setup.ps1
   - Autohotkey(wsl).
   - Neovim(wsl).
   - Minha estrutura padrão de pastas de projetos.
+
+## Como usar
+
+### 1.Powershell para interagir com WSL e windows.
+
+Dentro do PowerShell, execute:
+
+```
+Set-ExecutionPolicy Bypass -Scope Process -Force .\setup.ps1
+```
 
 ### 2. Ambiente Linux puro
 
