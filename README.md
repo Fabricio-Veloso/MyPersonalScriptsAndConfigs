@@ -4,10 +4,6 @@
 
 - O foco principal é o PowerShell, usando scripts Bash apenas quando necessário.
 
-📁 Estrutura de Pastas
-
-MyPersonalscripts/ │ ├── setup.ps1 # Script principal de automação (PowerShell) │ ├── bash/ └───│ Scripts de bash para linux puro(ex: Ubuntu) │ └── README.md # Documentação do projeto
-
 ✅ Requisitos
 
 - Acesso de sudo no Linux (para instalar pacotes)
@@ -74,3 +70,4 @@ Set-ExecutionPolicy Bypass -Scope Process -Force .\setup.ps1
 
 📌 Observações
 _Os scripts de bash para env linux puro (ubuntu) ainda não foram testados_
+\_Preciso adicionar uma opção para criar automaticamente no .bashrc um alias para dar cd para minha pasta de projetos e abrir o nvim lá.(atualmente esse alias está sendo colocado manualmente).
