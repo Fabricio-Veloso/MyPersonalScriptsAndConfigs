@@ -1,5 +1,5 @@
 # Variaveis personalizaveis
-$nomeUsuario = "Fabricio"
+$nomeUsuario = "Fabrício"
 $desktopPath = [Environment]::GetFolderPath("Desktop")
 $caminhoBase = Join-Path $desktopPath $nomeUsuario
 $caminhoProjetos = "$caminhoBase\projetos"
