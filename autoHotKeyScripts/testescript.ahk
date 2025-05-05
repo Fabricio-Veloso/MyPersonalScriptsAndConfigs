@@ -1,7 +1,7 @@
 #Requires AutoHotkey v2.0+
 
 ; Alt + H - Abrir ou focar Zen Browser
-!h::
+!j::
 {
     if WinExist("ahk_class MozillaWindowClass")  ; Classe da janela do Zen Browser
         WinActivate
@@ -12,7 +12,7 @@
 }
 
 ; Alt + J - Abrir ou focar Windows Terminal (com WSL)
-!j::
+!k::
 {
     if WinExist("ahk_class CASCADIA_HOSTING_WINDOW_CLASS")  ; Classe da janela do Terminal
         WinActivate
@@ -23,7 +23,7 @@
 }
 
 ; Alt + K - Abrir ou focar Obsidian
-!k::
+!l::
 {
     if WinExist("ahk_class Chrome_WidgetWin_1")  ; Classe da janela do Obsidian
         WinActivate
