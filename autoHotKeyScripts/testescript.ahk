@@ -33,3 +33,6 @@
         Run("C:\Path\To\Obsidian.exe")  ; Substitua pelo caminho real
 }
 
+;Maps Ralt to f13 to use it as aghost key
+RAlt::F13
+
