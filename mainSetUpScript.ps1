@@ -1,5 +1,5 @@
 # Variaveis personalizaveis
-$nomeUsuario = "Fabrício"
+$nomeUsuario = "Fabricio"
 $desktopPath = [Environment]::GetFolderPath("Desktop")
 $caminhoBase = Join-Path $desktopPath $nomeUsuario
 $caminhoProjetos = "$caminhoBase\projetos"
@@ -156,8 +156,8 @@ function Install-AutoHotkey {
 
         $executar = Read-Host "Deseja ativar o script AutoHotkey agora? (y/n)"
         if ($executar -eq 'y') {
-            $scriptAHK = Join-Path $caminhoRepoAHK "testescript.ahk"
-          if (Test-Path $scriptAHK) {
+           $scriptAHK = Join-Path $caminhoRepoAHK\autoHotkeyscripts\ "testescript.ahk"          
+           if (Test-Path $scriptAHK) {
               Start-Process $scriptAHK
               Write-Host "[OK] Script AHK executado diretamente."
           } else {
