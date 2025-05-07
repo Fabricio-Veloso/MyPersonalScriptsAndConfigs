@@ -28,14 +28,37 @@
     if WinExist("ahk_class Chrome_WidgetWin_1")  ; Classe da janela do Obsidian
         WinActivate
     else if WinExist("ahk_exe Obsidian.exe")  ; Executável do Obsidian
-        WinActivate/
+        WinActivate
     else
         Run("C:\Path\To\Obsidian.exe")  ; Substitua pelo caminho real
 }
 
-F24 & j::Send("{Backspace}")
-F24 & k::Send("{Delete}")
-F24 & l::Send("{Home}")
-F24 & ç::Send("{End}")
+F24 & j:: {
+    if GetKeyState("Shift", "P")
+        Send("+{Backspace}")  ; Shift + Backspace (geralmente não tem efeito diferente, mas mantido por consistência)
+    else
+        Send("{Backspace}")
+}
+
+F24 & k:: {
+    if GetKeyState("Shift", "P")
+        Send("+{Delete}")  ; Shift + Delete geralmente remove permanentemente
+    else
+        Send("{Delete}")
+}
+
+F24 & l:: {
+    if GetKeyState("Shift", "P")
+        Send("+{Home}")  ; Seleciona até o início da linha
+    else
+        Send("{Home}")
+}
+
+F24 & ç:: {
+    if GetKeyState("Shift", "P")
+        Send("+{End}")  ; Seleciona até o fim da linha
+    else
+        Send("{End}")
+}
 
 F24::Return
