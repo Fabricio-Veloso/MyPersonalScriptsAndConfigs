@@ -28,11 +28,14 @@
     if WinExist("ahk_class Chrome_WidgetWin_1")  ; Classe da janela do Obsidian
         WinActivate
     else if WinExist("ahk_exe Obsidian.exe")  ; Executável do Obsidian
-        WinActivate
+        WinActivate/
     else
         Run("C:\Path\To\Obsidian.exe")  ; Substitua pelo caminho real
 }
 
-;Maps Ralt to f13 to use it as aghost key
-RAlt::F13
+F24 & j::Send("{Backspace}")
+F24 & k::Send("{Delete}")
+F24 & l::Send("{Home}")
+F24 & ç::Send("{End}")
 
+F24::Return
