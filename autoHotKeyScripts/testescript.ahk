@@ -61,4 +61,14 @@ F24 & ç:: {
         Send("{End}")
 }
 
+
+; Evita comportamento estranho ao soltar F24 sozinho
 F24::Return
+
+F24 & h:: {
+    if GetKeyState("Shift", "P")
+        Send("+{Esc}")
+    else
+        Send("{Esc}")
+}
+
