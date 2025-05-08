@@ -23,10 +23,12 @@
   - Autohotkey(windows).
   - git(windows e wsl).
   - Neovim(wsl).
+  - GlazeWM
 - Configurar
-  - Autohotkey(wsl).
+  - Autohotkey.
   - Neovim(wsl).
   - Minha estrutura padrão de pastas de projetos.
+  - GlazeWM
 
 ## Como usar
 
@@ -35,7 +37,7 @@
 Dentro do PowerShell, execute:
 
 ```
-Set-ExecutionPolicy Bypass -Scope Process -Force .\setup.ps1
+Set-ExecutionPolicy Bypass -Scope Process -Force .\mainSetUpScript.ps1
 ```
 
 ### 2. Ambiente Linux puro
@@ -68,6 +70,12 @@ pwsh
 Set-ExecutionPolicy Bypass -Scope Process -Force .\setup.ps1
 ```
 
-📌 Observações
-_Os scripts de bash para env linux puro (ubuntu) ainda não foram testados_
-\_Preciso adicionar uma opção para criar automaticamente no .bashrc um alias para dar cd para minha pasta de projetos e abrir o nvim lá.(atualmente esse alias está sendo colocado manualmente).
+## Observações📌
+
+- Os scripts de bash para env linux puro (ubuntu) ainda não foram testados\_
+  Preciso adicionar uma opção para criar automaticamente no .bashrc um alias para dar cd para minha pasta de projetos e abrir o nvim lá.(atualmente esse alias está sendo colocado manualmente).
+
+## Todos:
+
+- [ ] WSL functions will be Refactored to syinc with wsl environment and dowload only the needed funcions that will have ps1 hooks to be called from windows.
+- [ ] ADD Tmux.
