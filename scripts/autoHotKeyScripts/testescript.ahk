@@ -1,6 +1,6 @@
 #Requires AutoHotkey v2.0+
 
-; Alt + H - Abrir ou focar Zen Browser
+; Alt + j - Abrir ou focar Zen Browser
 !j::
 {
     if WinExist("ahk_class MozillaWindowClass")  ; Classe da janela do Zen Browser
@@ -11,7 +11,7 @@
         Run("C:\Path\To\ZenBrowser\zen.exe")  ; Substitua pelo caminho real
 }
 
-; Alt + J - Abrir ou focar Windows Terminal (com WSL)
+; Alt + k - Abrir ou focar Windows Terminal (com WSL)
 !k::
 {
     if WinExist("ahk_class CASCADIA_HOSTING_WINDOW_CLASS")  ; Classe da janela do Terminal
@@ -22,7 +22,7 @@
         Run("wt.exe")  ; Comando para abrir o Windows Terminal
 }
 
-; Alt + K - Abrir ou focar Obsidian
+; Alt + l - Abrir ou focar Obsidian
 !l::
 {
     if WinExist("ahk_class Chrome_WidgetWin_1")  ; Classe da janela do Obsidian
@@ -32,6 +32,21 @@
     else
         Run("C:\Path\To\Obsidian.exe")  ; Substitua pelo caminho real
 }
+; Alt + ç - Abrir ou focarWhatapp 
+!ç::
+{
+    if WinExist("ahk_class ApplicationFrameWindow ahk_exe ApplicationFrameHost.exe") and WinExist("WhatsApp")
+    {
+        WinActivate  ; ativa a janela encontrada
+    }
+    else
+    {
+        Run("shell:AppsFolder\5319275A.WhatsAppDesktop_cv1g1gvanyjgm!App")
+    }
+}
+return
+
+
 
 F24 & j:: {
     if GetKeyState("Shift", "P")
