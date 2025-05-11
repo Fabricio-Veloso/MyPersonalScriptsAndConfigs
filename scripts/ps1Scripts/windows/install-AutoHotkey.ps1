@@ -13,17 +13,19 @@ function Install-AutoHotkey {
   $configurar = Read-Host "Deseja configurar o AutoHotkey com sua configuracao padrao? (y/n)"
   if ($configurar -eq 'y') {
     Ensure-GitInstalled
-    if (-not (Test-Path $AHKRepoPath)) {
-      git clone $repoAHK $AHKRepoPath
-      Write-Host "[OK] Repositorio clonado em: $AHKRepoPath"
+    if (-not (Test-Path $ScriptsAndConfigsRepoPath)) {
+      git clone $repoAHK $ScriptsAndConfigsRepoPath
+      Write-Host "[OK] Repositorio clonado em: $ScriptsAndConfigsRepoPath"
     } else {
-      Write-Host "[INFO] Repositorio ja existe em: $AHKRepoPath"
+      Write-Host "[INFO] Repositório já existe em: $ScriptsAndConfigsRepoPath. Atualizando..."
+      Push-Location $ScriptsAndConfigsRepoPath
+      git pull
+      Pop-Location   
     }
 
     $executar = Read-Host "Deseja ativar o script AutoHotkey agora? (y/n)"
     if ($executar -eq 'y') {
-      $scriptAHK = Join-Path $AHKRepoPath\autoHotkeyscripts\ "testescript.ahk"          
-           if (Test-Path $scriptAHK) {
+        if (Test-Path $scriptAHK) {
         Start-Process $scriptAHK
         Write-Host "[OK] Script AHK executado diretamente."
       } else {

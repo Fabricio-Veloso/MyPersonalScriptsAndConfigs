@@ -14,8 +14,11 @@ $UserName = "Fabricio"
 $desktopPath = [Environment]::GetFolderPath("Desktop")
 $DeskTopUserFolder = Join-Path $desktopPath $UserName
 $ProjectFolderPath = "$DeskTopUserFolder\projetos"
-$AHKRepoPath = "$DeskTopUserFolder\MyPersonalScripts"
-$repoAHK = "https://github.com/Fabricio-Veloso/MyPersonalScripts.git"
+$RepoFolderName = "MyPersonalScriptsAndConfigs"
+$ScriptsAndConfigsRepoPath = Join-Path $ProjectFolderPath $RepoFolderName
+$repoAHK = "https://github.com/Fabricio-Veloso/MyPersonalScriptsAndConfigs.git"
+$scriptAHK = Join-Path $ScriptsAndConfigsRepoPath "scripts\autoHotKeyScripts\testscript.ahk"
+
 
 if (-not (Test-Path $ProjectFolderPath)) {
     New-Item -ItemType Directory -Path $ProjectFolderPath -Force | Out-Null
