@@ -17,7 +17,6 @@
 🔥 Funções disponíveis no projeto
 
 - Instalar:
-  - WSL(windows).
   - Obsidian(windows).
   - google drive(windows).
   - Autohotkey(windows).
