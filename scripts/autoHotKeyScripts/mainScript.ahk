@@ -1,5 +1,7 @@
 #Requires AutoHotkey v2.0+
 
+; LEMBRE-SE QUE ESTE PROGRAMAS PRECISAM ESTAR NO PATH PARA QUE FUNCIONE!
+
 ; Alt + j - Abrir ou focar Zen Browser
 !j::
 {
@@ -8,18 +10,18 @@
     else if WinExist("ahk_exe zen.exe")  ; Executável do Zen Browser
         WinActivate
     else
-        Run("C:\Path\To\ZenBrowser\zen.exe")  ; Substitua pelo caminho real
+        Run("zen.exe")  ; Substitua pelo caminho real
 }
 
-; Alt + k - Abrir ou focar Windows Terminal (com WSL)
+; Alt + k - Abrir ou focar Warp terminal 
 !k::
 {
-    if WinExist("ahk_class CASCADIA_HOSTING_WINDOW_CLASS")  ; Classe da janela do Terminal
+    if WinExist("ahk_class Window Class")  ; Classe da janela do Terminal
         WinActivate
-    else if WinExist("ahk_exe WindowsTerminal.exe")  ; Executável do Windows Terminal
+    else if WinExist("ahk_exe warp.exe")  ; Executável do Windows Terminal
         WinActivate
     else
-        Run("wt.exe")  ; Comando para abrir o Windows Terminal
+        Run("warp.exe")  ; Comando para abrir o Windows Terminal
 }
 
 ; Alt + l - Abrir ou focar Obsidian
@@ -30,7 +32,7 @@
     else if WinExist("ahk_exe Obsidian.exe")  ; Executável do Obsidian
         WinActivate
     else
-        Run("C:\Path\To\Obsidian.exe")  ; Substitua pelo caminho real
+        Run("Obsidian.exe")  ; Substitua pelo caminho real
 }
 ; Alt + ç - Abrir ou focarWhatapp 
 !ç::
