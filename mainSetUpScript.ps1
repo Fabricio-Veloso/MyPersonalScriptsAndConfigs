@@ -11,18 +11,22 @@
 
 #VARS
 $UserName = "Fabricio"
-$desktopPath = [Environment]::GetFolderPath("Desktop")
-$DeskTopUserFolder = Join-Path $desktopPath $UserName
-$ProjectFolderPath = "$DeskTopUserFolder\projetos"
+# $desktopPath = [Environment]::GetFolderPath("Desktop")
+# $DeskTopUserFolder = Join-Path $desktopPath $UserName
+$ProjectFolderPath = "\projetos"
 $RepoFolderName = "MyPersonalScriptsAndConfigs"
 $ScriptsAndConfigsRepoPath = Join-Path $ProjectFolderPath $RepoFolderName
 $repoAHK = "https://github.com/Fabricio-Veloso/MyPersonalScriptsAndConfigs.git"
-$scriptAHK = Join-Path $ScriptsAndConfigsRepoPath "scripts\autoHotKeyScripts\testscript.ahk"
+$scriptAHK = Join-Path $ScriptsAndConfigsRepoPath "scripts\autoHotKeyScripts\mainScript.ahk"
 
 
-if (-not (Test-Path $ProjectFolderPath)) {
-    New-Item -ItemType Directory -Path $ProjectFolderPath -Force | Out-Null
+if (-not (Test-Path $projectsPath)) {
+    New-Item -ItemType Directory -Path $projectsPath -Force | Out-Null
+    Write-Host "✅ Pasta criada: $projectsPath"
+} else {
+    Write-Host "📁 Pasta já existente: $projectsPath"
 }
+
 #Stars-Sleep -Seconds 50
 # Iniciar o script
 Start-Installer
