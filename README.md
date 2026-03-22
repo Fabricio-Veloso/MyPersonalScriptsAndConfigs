@@ -25,6 +25,13 @@ CLI em Python para instalar, configurar e validar um ambiente pessoal de trabalh
 - `check`: mostra o estado atual por modulo.
 - `verify`: valida se o resultado final ficou funcional.
 
+## Estado atual da base
+
+- `full.toml` ja inclui `git`, `project_folders`, `neovim`, `autohotkey` e `glazewm`.
+- `project_folders` ja usa o nome configurado pelo usuario para resolver o caminho no Windows.
+- `autohotkey` ja valida instalacao, script em `Documents` e script na pasta de `Startup`.
+- `glazewm` ja valida instalacao, config versionada e atalho de inicializacao com o sistema.
+
 ## Estado do repositorio
 
 Esta e a fundacao da nova arquitetura do projeto. Os scripts antigos ainda podem servir como referencia de comportamento e ativos a migrar, mas a direcao principal agora parte da CLI em Python.
