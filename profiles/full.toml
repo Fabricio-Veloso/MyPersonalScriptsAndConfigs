@@ -1,0 +1,11 @@
+name = "full"
+description = "Full personal environment baseline for Windows and Linux."
+modules = [
+  "git",
+  "project_folders",
+  "neovim",
+  "autohotkey",
+  "glazewm",
+]
+
+[variables]
