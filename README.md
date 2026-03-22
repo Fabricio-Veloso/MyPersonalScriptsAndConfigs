@@ -1,80 +1,48 @@
-# 🛠 Setup de Ambiente com PowerShell e Bash
+# Personal Environment Setup
 
-- Este projeto foi criado para automatizar a instalação de ferramentas essenciais para meu workflow como Neovim, obsidiane PowerShell em ambientes Windows, WSL e Linux puro.
+CLI em Python para instalar, configurar e validar um ambiente pessoal de trabalho de forma reexecutavel, modular e multiplataforma.
 
-- O foco principal é o PowerShell, usando scripts Bash apenas quando necessário.
+## Direcao atual
 
-✅ Requisitos
+- Python como orquestrador principal.
+- Perfis declarativos para definir o ambiente desejado.
+- Modulos por ferramenta ou capacidade.
+- Adaptadores pequenos para diferencas de Windows e Linux.
+- Fluxo principal baseado em `plan`, `apply`, `check` e `verify`.
 
-- Acesso de sudo no Linux (para instalar pacotes)
+## Estrutura inicial
 
-- Permissões de execução para Bash (chmod +x bash/\*.sh)
+- `src/personal_setup/` contem a CLI, modelos, servicos, modulos e adaptadores.
+- `profiles/` guarda a composicao declarativa do ambiente.
+- `assets/` guarda configuracoes versionadas do ambiente.
+- `tests/` contem testes pequenos da base da aplicacao.
+- `docs/specs/` e `docs/decisions/` guardam specs curtas e decisoes estaveis.
 
-- Em Windows/WSL: PowerShell versão 5+ ou superior
+## Fluxo esperado
 
-- Em Linux: Instalar o PowerShell usando install-pwsh.sh
+- `plan`: compara estado atual e estado desejado.
+- `apply`: executa as mudancas necessarias.
+- `check`: mostra o estado atual por modulo.
+- `verify`: valida se o resultado final ficou funcional.
 
-🔥 Funções disponíveis no projeto
+## Estado do repositorio
 
-- Instalar:
-  - Obsidian(windows).
-  - google drive(windows).
-  - Autohotkey(windows).
-  - git(windows e wsl).
-  - Neovim(wsl).
-  - GlazeWM
-- Configurar
-  - Autohotkey.
-  - Neovim(wsl).
-  - Minha estrutura padrão de pastas de projetos.
-  - GlazeWM
+Esta e a fundacao da nova arquitetura do projeto. Os scripts antigos ainda podem servir como referencia de comportamento e ativos a migrar, mas a direcao principal agora parte da CLI em Python.
 
-## Como usar
+## Como executar
 
-### 1.Powershell para interagir com WSL e windows.
+Hoje voce ja pode iniciar a CLI local com um unico comando:
 
-Dentro do PowerShell, execute:
-
-```
-Set-ExecutionPolicy Bypass -Scope Process -Force .\mainSetUpScript.ps1
+```bash
+python main.py
 ```
 
-### 2. Ambiente Linux puro
+Ao iniciar sem argumentos, a CLI mostra um menu com as opcoes disponiveis, incluindo configurar o nome do usuario, planejar, aplicar, checar e verificar o ambiente.
 
-_Se você está em um Linux puro (Ubuntu, Debian, etc): 2.1 Primeiro passo: dar permissão aos scripts Bash_
+Se preferir executar de forma direta, a base tambem suporta comandos como:
 
-Depois de clonar o projeto, execute:
-
+```bash
+python main.py plan --profile full
+python main.py apply --profile full
+python main.py configure-user --name Fabricio
 ```
-chmod +x bash/*.sh
-```
-
-Isso garante que os scripts Bash possam ser executados. 2.2 Instalar PowerShell
-
-Execute o script para instalar o PowerShell:
-
-```
-bash bash/install-pwsh.sh
-```
-
-Após instalado, inicie o PowerShell com:
-
-```
-pwsh
-```
-
-2.3 Rodar o mainSetUpScript.ps1 normalmente. Dentro do PowerShell, execute:
-
-```
-Set-ExecutionPolicy Bypass -Scope Process -Force .\setup.ps1
-```
-
-## Observações📌
-
-- Os scripts de bash para env linux puro (ubuntu) ainda não foram testados\_
-  Preciso adicionar uma opção para criar automaticamente no .bashrc um alias para dar cd para minha pasta de projetos e abrir o nvim lá.(atualmente esse alias está sendo colocado manualmente).
-
-## Todos:
-
-- [ ] WSL functions will be Refactored to syinc with wsl environment and dowload only the needed funcions that will have ps1 hooks to be called from windows.
-- [ ] ADD Tmux.
