@@ -6,17 +6,21 @@ Definir a fundacao do planner da CLI para transformar um profile declarado e o e
 
 ## Contexto atual
 
-O projeto ja possui um esqueleto funcional de `plan` em `src/personal_setup/services/planner.py`, mas ele ainda trabalha com regras muito simples: percorre os modulos na ordem do profile, chama `check()` e produz `keep`, `apply` ou `skip`.
+O projeto ja possui uma primeira fundacao funcional de `plan` em `src/personal_setup/services/planner.py`. Hoje o planner:
 
-Essa base e suficiente para validar o fluxo inicial da CLI, mas ainda nao define de forma estavel:
+- carrega o profile declarado
+- resolve dependencias entre modulos
+- deduplica modulos repetidos
+- identifica erros estruturais como modulo desconhecido, dependencia ausente e dependencia circular
+- produz passos com `keep`, `install`, `configure`, `skip` ou `blocked`
 
-- como dependencias entre modulos devem ser resolvidas
-- quais erros pertencem ao planejamento
-- como a ordem final dos passos deve ser calculada
-- quais acoes o plano pode representar
+Essa base ja e suficiente para sustentar a primeira versao da CLI, mas ainda deixa em aberto:
+
 - quais contratos os modulos precisam respeitar para responder ao planner
+- como evoluir de `install/configure` para tipos de acao mais ricos sem perder simplicidade
+- como representar melhor bloqueios ou pre-condicoes entre modulos no resultado final
 
-Sem essa definicao, a implementacao concreta de `check()`, `apply()` e `verify()` em cada modulo corre o risco de ficar inconsistente ou muito acoplada a detalhes temporarios da primeira versao.
+Sem consolidar essa semantica, a implementacao concreta de `check()`, `apply()` e `verify()` em cada modulo pode voltar a divergir com o tempo.
 
 ## Entrada
 
@@ -46,31 +50,32 @@ O plano precisa ser apenas descritivo. Ele nao instala, nao configura e nao alte
 - O planner nao deve depender de menus interativos ou perguntas ao usuario para montar o plano.
 - Modulos nao suportados na plataforma atual devem aparecer como `skip`, e nao como erro.
 - Modulos que ja satisfazem o baseline esperado devem aparecer como `keep`.
-- Modulos que exigem acao devem aparecer como `apply`.
+- Modulos que exigem acao devem aparecer com a acao mais especifica disponivel, priorizando `install` ou `configure` quando o contrato do modulo permitir.
 - O planner deve resolver dependencias entre modulos antes de montar a ordem final do plano.
 - Dependencias devem ser planejadas antes dos modulos que dependem delas.
 - Dependencia ausente no registry deve bloquear o planejamento.
 - Dependencia circular deve bloquear o planejamento.
 - Modulo referenciado no profile e ausente no registry deve bloquear o planejamento.
 - Bloqueios de planejamento devem acontecer antes de qualquer tentativa de `apply()`.
-- O planner deve preferir simplicidade: a primeira fundacao aceita as acoes `keep`, `apply`, `skip` e `blocked`.
+- O planner deve preferir simplicidade: a fundacao atual aceita `keep`, `install`, `configure`, `skip` e `blocked`, evitando explodir cedo demais a quantidade de tipos de passo.
 - A ordem declarada no profile pode servir como prioridade humana, mas nao pode violar a ordem de dependencias.
 
 ## Impacto em modulos, interfaces, configuracoes, armazenamento de dados e integracoes, se houver
 
-- `src/personal_setup/services/planner.py` deve evoluir de iteracao simples para planejamento com resolucao de dependencias e bloqueios explicitos.
-- `src/personal_setup/models/plan.py` provavelmente precisara de campos adicionais para representar bloqueios, dependencias e talvez origem do passo.
-- `src/personal_setup/models/module.py` pode precisar endurecer o contrato de `CheckResult`, deixando mais claro o que significa estar pronto, ausente ou nao aplicavel.
+- `src/personal_setup/services/planner.py` ja concentra ordenacao por dependencias e bloqueios estruturais, mas ainda pode evoluir na forma como explica razoes e pre-condicoes.
+- `src/personal_setup/models/plan.py` ja representa dependencias e bloqueios basicos, mas pode evoluir se o plano precisar carregar mais contexto.
+- `src/personal_setup/models/module.py` ja diferencia readiness, install, configure e bloqueio, mas ainda pode ganhar semantica adicional conforme surgirem mais modulos.
 - `src/personal_setup/modules/base.py` deve continuar simples, mas com semantica mais clara para `check()`, `apply()` e `verify()`.
 - `profiles/` continua como entrada declarativa principal, sem necessidade de mudar formato nesta etapa.
 - `tests/` precisara cobrir resolucao de dependencias, ordem de passos e erros estruturais.
 
 ## Casos principais
 
-- Um profile lista modulos validos sem dependencias e o planner produz uma sequencia simples de `keep`, `apply` e `skip`.
+- Um profile lista modulos validos sem dependencias e o planner produz uma sequencia simples de `keep`, `install`, `configure` e `skip` conforme o estado observado.
 - Um modulo depende de outro e o planner garante que o modulo de base apareca antes do dependente.
 - Um modulo Windows-only aparece em Linux e o planner o marca como `skip` com motivo claro.
-- Um modulo faltante no sistema retorna `apply` com motivo derivado do `check()`.
+- Um modulo faltante no sistema retorna `install` com motivo derivado do `check()`.
+- Um modulo instalado, mas com config ou inicializacao faltando, retorna `configure`.
 - Um modulo ja atendido retorna `keep` com motivo estavel e legivel.
 
 ## Casos de borda relevantes
@@ -88,6 +93,6 @@ O plano precisa ser apenas descritivo. Ele nao instala, nao configura e nao alte
 - Dependencias aparecem antes dos modulos dependentes no plano final.
 - Modulos nao aplicaveis sao reportados como `skip`.
 - Modulos prontos sao reportados como `keep`.
-- Modulos pendentes sao reportados como `apply`.
+- Modulos pendentes sao reportados como `install` ou `configure`, conforme o contrato do modulo.
 - Erros estruturais de planejamento sao reportados como `blocked` ou excecao tipada equivalente antes de qualquer execucao.
 - A fundacao do planner deixa explicito o contrato esperado dos modulos sem exigir implementacao completa dos setups reais nesta etapa.
