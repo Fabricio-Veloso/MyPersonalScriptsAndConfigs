@@ -13,15 +13,13 @@
         Run("zen.exe")  ; Substitua pelo caminho real
 }
 
-; Alt + k - Abrir ou focar Warp terminal 
+; Alt + k - Abrir ou focar Windows Terminal
 !k::
 {
-    if WinExist("ahk_class Window Class")  ; Classe da janela do Terminal
-        WinActivate
-    else if WinExist("ahk_exe warp.exe")  ; Executável do Windows Terminal
+    if WinExist("ahk_exe WindowsTerminal.exe")
         WinActivate
     else
-        Run("warp.exe")  ; Comando para abrir o Windows Terminal
+        Run("wt.exe")
 }
 
 ; Alt + l - Abrir ou focar Obsidian
