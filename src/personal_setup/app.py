@@ -25,8 +25,14 @@ class SetupApplication:
     def configure_user_name(self, user_name: str) -> Path:
         return self.user_settings.save_user_name(user_name)
 
+    def configure_neovim_repo_url(self, repo_url: str) -> Path:
+        return self.user_settings.save_neovim_repo_url(repo_url)
+
     def get_user_name(self) -> str | None:
         return self.user_settings.load_user_name()
+
+    def get_neovim_repo_url(self) -> str | None:
+        return self.user_settings.load_neovim_repo_url()
 
     def plan(self, profile_name: str):
         return self.planner.build_plan(profile_name)
@@ -37,8 +43,8 @@ class SetupApplication:
     def check(self, profile_name: str):
         return self.checker.check(profile_name)
 
-    def verify(self, profile_name: str):
-        return self.verifier.verify(profile_name)
+    def verify(self, profile_name: str, *, sandbox: bool = False):
+        return self.verifier.verify(profile_name, sandbox=sandbox)
 
 
 def create_app() -> SetupApplication:

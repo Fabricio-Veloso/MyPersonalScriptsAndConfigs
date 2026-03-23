@@ -22,6 +22,18 @@ class UserSettingsStoreTest(unittest.TestCase):
             self.assertEqual(saved_path, file_path)
             self.assertEqual(store.load_user_name(), "Fabricio")
 
+    def test_save_and_load_neovim_repo_url_without_losing_user_name(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            file_path = Path(temp_dir) / "user_settings.json"
+            store = UserSettingsStore(file_path)
+
+            store.save_user_name("Fabricio")
+            saved_path = store.save_neovim_repo_url("https://github.com/Fabricio-Veloso/NvimConfig")
+
+            self.assertEqual(saved_path, file_path)
+            self.assertEqual(store.load_user_name(), "Fabricio")
+            self.assertEqual(store.load_neovim_repo_url(), "https://github.com/Fabricio-Veloso/NvimConfig")
+
 
 if __name__ == "__main__":
     unittest.main()
