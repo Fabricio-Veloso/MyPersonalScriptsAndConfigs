@@ -29,6 +29,7 @@ CLI em Python para instalar, configurar e validar um ambiente pessoal de trabalh
 
 - `full.toml` ja inclui `git`, `project_folders`, `neovim`, `autohotkey` e `glazewm`.
 - `project_folders` ja usa o nome configurado pelo usuario para resolver o caminho no Windows.
+- `neovim` ja consegue usar a config local padrao ou um repo configuravel, validar dependencias basicas, fazer smoke verify isolado com `lazy` e `checkhealth`, executar sandbox verify com provisionamento basico em Docker/WSL e limpar o workspace temporario usado no sandbox.
 - `autohotkey` ja valida instalacao, script em `Documents` e script na pasta de `Startup`.
 - `glazewm` ja valida instalacao, config versionada e atalho de inicializacao com o sistema.
 
@@ -52,4 +53,6 @@ Se preferir executar de forma direta, a base tambem suporta comandos como:
 python main.py plan --profile full
 python main.py apply --profile full
 python main.py configure-user --name Fabricio
+python main.py configure-neovim --repo-url https://github.com/Fabricio-Veloso/NvimConfig
+python main.py verify --profile full --sandbox
 ```
