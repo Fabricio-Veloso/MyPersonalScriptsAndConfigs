@@ -35,7 +35,9 @@ CLI em Python para instalar, configurar e validar um ambiente pessoal de trabalh
 
 ## Estado do repositorio
 
-Esta e a fundacao da nova arquitetura do projeto. Os scripts antigos ainda podem servir como referencia de comportamento e ativos a migrar, mas a direcao principal agora parte da CLI em Python.
+Esta e a fundacao da nova arquitetura do projeto. A direcao principal agora parte da CLI em Python.
+
+Os scripts antigos de PowerShell que faziam parte do bootstrap anterior foram removidos da raiz ativa do projeto. Os scripts bash antigos que ainda podem servir como referencia foram movidos para `archive/legacy/bash_Scripts/`.
 
 ## Como executar
 
