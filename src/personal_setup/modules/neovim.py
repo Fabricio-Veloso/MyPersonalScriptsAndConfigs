@@ -40,6 +40,7 @@ class NeovimModule(BaseModule):
         winget_available_fn=winget_is_available,
         winget_install_fn=winget_install,
         run_fn=run,
+        progress_fn=None,
     ) -> None:
         super().__init__(project_root)
         self.platform_name = platform_name
@@ -53,6 +54,7 @@ class NeovimModule(BaseModule):
         self.winget_available_fn = winget_available_fn
         self.winget_install_fn = winget_install_fn
         self.run_fn = run_fn
+        self.progress_fn = progress_fn or (lambda message: None)
 
     def _current_platform(self) -> str:
         return self.platform_name or detect_platform()
@@ -251,6 +253,106 @@ class NeovimModule(BaseModule):
             "+qa",
         ]
 
+    def _report_progress(self, message: str) -> None:
+        self.progress_fn(f"[neovim] {message}")
+
+    def _sandbox_verify_hint(self) -> str:
+        repo_url = self._current_config_repo_url()
+        if self._current_platform() == "windows":
+            return (
+                "sandbox verify preview: docker run --rm ubuntu:24.04 bash -lc \""
+                "workdir=$(mktemp -d) && trap 'rm -rf \"\\$workdir\"' EXIT && mkdir -p \"\\${workdir}/config\" \"\\${workdir}/data\" \"\\${workdir}/state\" \"\\${workdir}/cache\" \"\\${workdir}/home\" && apt-get update && "
+                "apt-get install -y git neovim lua5.4 make ripgrep python3 nodejs && "
+                f"git clone --depth 1 {repo_url} \"\\${{workdir}}/config/personal-setup-nvim\" && "
+                "XDG_CONFIG_HOME=\"\\${workdir}/config\" NVIM_APPNAME=personal-setup-nvim nvim --headless "
+                "+lua\\ pcall(require,\\ 'lazy') +checkhealth +qa\"; fallback: wsl -u root bash -lc \"workdir=$(mktemp -d) && trap 'rm -rf \"\\$workdir\"' EXIT && mkdir -p \"\\${workdir}/config\" \"\\${workdir}/data\" \"\\${workdir}/state\" \"\\${workdir}/cache\" \"\\${workdir}/home\" && apt-get update && apt-get install -y git neovim lua5.4 make ripgrep python3 nodejs && "
+                f"git clone --depth 1 {repo_url} \"\\${{workdir}}/config/personal-setup-nvim\" && "
+                "XDG_CONFIG_HOME=\"\\${workdir}/config\" NVIM_APPNAME=personal-setup-nvim nvim --headless "
+                "+lua\\ pcall(require,\\ 'lazy') +checkhealth +qa\""
+            )
+
+        return (
+            "sandbox verify preview: docker run --rm ubuntu:24.04 bash -lc \""
+            "workdir=$(mktemp -d) && trap 'rm -rf \"\\$workdir\"' EXIT && mkdir -p \"\\${workdir}/config\" \"\\${workdir}/data\" \"\\${workdir}/state\" \"\\${workdir}/cache\" \"\\${workdir}/home\" && apt-get update && "
+            "apt-get install -y git neovim lua5.4 make ripgrep python3 nodejs && "
+            f"git clone --depth 1 {repo_url} \"\\${{workdir}}/config/personal-setup-nvim\" && "
+            "XDG_CONFIG_HOME=\"\\${workdir}/config\" NVIM_APPNAME=personal-setup-nvim nvim --headless "
+            "+lua\\ pcall(require,\\ 'lazy') +checkhealth +qa\""
+        )
+
+    def _docker_sandbox_command(self) -> list[str]:
+        repo_url = self._current_config_repo_url()
+        script = (
+            "set -euo pipefail && "
+            "workdir=$(mktemp -d) && "
+            "trap 'rm -rf \"\\$workdir\"' EXIT && "
+            "mkdir -p \"\\${workdir}/config\" \"\\${workdir}/data\" \"\\${workdir}/state\" \"\\${workdir}/cache\" \"\\${workdir}/home\" && "
+            "apt-get update && "
+            "apt-get install -y git neovim lua5.4 make ripgrep python3 nodejs && "
+            f"git clone --depth 1 {repo_url} \"\\${{workdir}}/config/personal-setup-nvim\" && "
+            "XDG_CONFIG_HOME=\"\\${workdir}/config\" XDG_DATA_HOME=\"\\${workdir}/data\" "
+            "XDG_STATE_HOME=\"\\${workdir}/state\" XDG_CACHE_HOME=\"\\${workdir}/cache\" "
+            "HOME=\"\\${workdir}/home\" NVIM_APPNAME=personal-setup-nvim "
+            "nvim --headless \"+lua pcall(require, 'lazy')\" +checkhealth +qa"
+        )
+        return ["docker", "run", "--rm", "ubuntu:24.04", "bash", "-lc", script]
+
+    def _wsl_sandbox_command(self) -> list[str]:
+        repo_url = self._current_config_repo_url()
+        script = (
+            "set -euo pipefail && "
+            "workdir=$(mktemp -d) && "
+            "trap 'rm -rf \"\\$workdir\"' EXIT && "
+            "mkdir -p \"\\${workdir}/config\" \"\\${workdir}/data\" \"\\${workdir}/state\" \"\\${workdir}/cache\" \"\\${workdir}/home\" && "
+            "apt-get update && "
+            "apt-get install -y git neovim lua5.4 make ripgrep python3 nodejs && "
+            f"git clone --depth 1 {repo_url} \"\\${{workdir}}/config/personal-setup-nvim\" && "
+            "XDG_CONFIG_HOME=\"\\${workdir}/config\" XDG_DATA_HOME=\"\\${workdir}/data\" "
+            "XDG_STATE_HOME=\"\\${workdir}/state\" XDG_CACHE_HOME=\"\\${workdir}/cache\" "
+            "HOME=\"\\${workdir}/home\" NVIM_APPNAME=personal-setup-nvim "
+            "nvim --headless \"+lua pcall(require, 'lazy')\" +checkhealth +qa"
+        )
+        return ["wsl", "-u", "root", "bash", "-lc", script]
+
+    def _run_sandbox_verify(self) -> CheckResult:
+        commands: list[list[str]] = []
+        if self.command_exists_fn("docker"):
+            commands.append(self._docker_sandbox_command())
+        if self._current_platform() == "windows" and self.command_exists_fn("wsl"):
+            commands.append(self._wsl_sandbox_command())
+
+        if not commands:
+            return CheckResult(
+                "neovim",
+                True,
+                False,
+                details="sandbox verify requested but no supported backend is available; install Docker or WSL",
+            )
+
+        failure_messages: list[str] = []
+        for command in commands:
+            self._report_progress(f"running sandbox verify via {command[0]}")
+            result = self.run_fn(command)
+            if getattr(result, "returncode", 0) == 0:
+                backend = command[0]
+                return CheckResult(
+                    "neovim",
+                    True,
+                    True,
+                    details=f"Neovim sandbox verify succeeded via {backend}",
+                )
+
+            output = self._command_output(result)
+            backend = command[0]
+            failure_messages.append(f"{backend}: {output or 'unknown error'}")
+
+        return CheckResult(
+            "neovim",
+            True,
+            False,
+            details="Neovim sandbox verify failed: " + " | ".join(failure_messages),
+        )
+
     def check(self) -> CheckResult:
         if not self.is_supported_on_current_platform():
             return CheckResult("neovim", False, False, details="Neovim only applies to Windows and Linux")
@@ -289,6 +391,7 @@ class NeovimModule(BaseModule):
         warnings: list[str] = []
         if missing_optional_commands:
             warnings.append("missing optional runtime commands: " + ", ".join(missing_optional_commands))
+        warnings.append(self._sandbox_verify_hint())
         blocked_reason = ""
         if source_kind is None:
             blocked_reason = "no usable Neovim config source is available"
@@ -322,6 +425,7 @@ class NeovimModule(BaseModule):
             raise RuntimeError(check_result.blocked_reason)
 
         if check_result.install_required:
+            self._report_progress("installing Neovim on host")
             result = self._install_main_binary()
             if getattr(result, "returncode", 0) != 0 and not self.command_exists_fn("nvim"):
                 command_output = "\n".join(
@@ -349,9 +453,11 @@ class NeovimModule(BaseModule):
             app_name = "personal-setup-verify"
             isolated_config_dir = temp_root / "config" / app_name
             isolated_config_dir.parent.mkdir(parents=True, exist_ok=True)
+            self._report_progress("preparing isolated Neovim config")
             self._materialize_config(isolated_config_dir)
 
             env = self._build_isolated_environment(temp_root, app_name)
+            self._report_progress("running isolated Neovim smoke verify")
             result = self.run_fn(
                 self._verify_command(),
                 cwd=temp_root,
@@ -374,6 +480,21 @@ class NeovimModule(BaseModule):
             )
 
         details = "isolated Neovim smoke verify succeeded"
+        if sandbox:
+            sandbox_result = self._run_sandbox_verify()
+            if not sandbox_result.ready:
+                sandbox_details = sandbox_result.details
+                if check_result.warnings:
+                    sandbox_details = f"{sandbox_details}; " + "; ".join(check_result.warnings)
+                return CheckResult(
+                    "neovim",
+                    True,
+                    False,
+                    details=sandbox_details,
+                    warnings=check_result.warnings,
+                )
+            details = f"{details}; {sandbox_result.details}"
+
         if check_result.warnings:
             details = f"{details}; " + "; ".join(check_result.warnings)
         return CheckResult(

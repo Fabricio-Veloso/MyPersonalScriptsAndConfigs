@@ -79,6 +79,7 @@ class NeovimModuleTest(unittest.TestCase):
             self.assertFalse(result.ready)
             self.assertTrue(result.configure_required)
             self.assertIn("repository is public", result.details)
+            self.assertIn("sandbox verify preview", result.details)
 
     def test_check_uses_repo_url_from_getter(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -204,6 +205,8 @@ class NeovimModuleTest(unittest.TestCase):
 
             captured: dict[str, object] = {}
 
+            progress_messages: list[str] = []
+
             def fake_run(command: list[str], *, cwd=None, env=None):
                 captured["command"] = command
                 captured["cwd"] = cwd
@@ -221,6 +224,7 @@ class NeovimModuleTest(unittest.TestCase):
                 command_exists_fn=lambda _: True,
                 apt_available_fn=lambda: True,
                 run_fn=fake_run,
+                progress_fn=progress_messages.append,
             )
 
             result = module.verify()
@@ -233,7 +237,9 @@ class NeovimModuleTest(unittest.TestCase):
             self.assertTrue(captured["isolated_init_exists_during_run"])
             self.assertFalse(Path(captured["isolated_root"]).exists())
             self.assertIn("smoke verify succeeded", result.details)
-            self.assertEqual(result.warnings, ())
+            self.assertIn("sandbox verify preview", result.details)
+            self.assertIn("[neovim] preparing isolated Neovim config", progress_messages)
+            self.assertIn("[neovim] running isolated Neovim smoke verify", progress_messages)
 
     def test_verify_reports_headless_startup_failure(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -260,6 +266,101 @@ class NeovimModuleTest(unittest.TestCase):
             self.assertFalse(result.ready)
             self.assertIn("isolated Neovim smoke verify failed", result.details)
             self.assertIn("missing dependency", result.details)
+
+    def test_verify_runs_sandbox_when_requested_and_backend_is_available(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_dir = Path(temp_dir) / "nvim"
+            source_dir.mkdir(parents=True, exist_ok=True)
+            (source_dir / "init.lua").write_text("print('hello')\n", encoding="utf-8")
+
+            seen_commands: list[list[str]] = []
+            progress_messages: list[str] = []
+
+            def fake_run(command: list[str], *, cwd=None, env=None):
+                seen_commands.append(command)
+                if command[0] == "nvim":
+                    return SimpleNamespace(returncode=0, stdout="", stderr="")
+                if command[0] == "docker":
+                    return SimpleNamespace(returncode=0, stdout="sandbox ok", stderr="")
+                self.fail(f"unexpected command: {command}")
+
+            module = NeovimModule(
+                PROJECT_ROOT,
+                platform_name="linux",
+                config_source_dir=source_dir,
+                config_destination_dir=source_dir,
+                command_exists_fn=lambda command: command in {"nvim", "lua", "docker"},
+                apt_available_fn=lambda: True,
+                run_fn=fake_run,
+                progress_fn=progress_messages.append,
+            )
+
+            result = module.verify(sandbox=True)
+
+            self.assertTrue(result.ready)
+            self.assertEqual(seen_commands[1][0], "docker")
+            self.assertIn("Neovim sandbox verify succeeded via docker", result.details)
+            self.assertIn("[neovim] running sandbox verify via docker", progress_messages)
+
+    def test_verify_falls_back_to_wsl_when_docker_backend_fails_on_windows(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_dir = Path(temp_dir) / "nvim"
+            source_dir.mkdir(parents=True, exist_ok=True)
+            (source_dir / "init.lua").write_text("print('hello')\n", encoding="utf-8")
+
+            seen_commands: list[list[str]] = []
+
+            def fake_run(command: list[str], *, cwd=None, env=None):
+                seen_commands.append(command)
+                if command[0] == "nvim":
+                    return SimpleNamespace(returncode=0, stdout="", stderr="")
+                if command[0] == "docker":
+                    return SimpleNamespace(returncode=1, stdout="", stderr="daemon unavailable")
+                if command[0] == "wsl":
+                    return SimpleNamespace(returncode=0, stdout="ok", stderr="")
+                self.fail(f"unexpected command: {command}")
+
+            module = NeovimModule(
+                PROJECT_ROOT,
+                platform_name="windows",
+                config_source_dir=source_dir,
+                config_destination_dir=source_dir,
+                command_exists_fn=lambda command: command in {"nvim", "lua", "docker", "wsl"},
+                winget_available_fn=lambda: True,
+                run_fn=fake_run,
+            )
+
+            result = module.verify(sandbox=True)
+
+            self.assertTrue(result.ready)
+            self.assertEqual(seen_commands[1][0], "docker")
+            self.assertEqual(seen_commands[2][0], "wsl")
+            self.assertEqual(seen_commands[2][1:4], ["-u", "root", "bash"])
+            self.assertIn("apt-get install -y git neovim lua5.4 make ripgrep python3 nodejs", seen_commands[2][-1])
+            self.assertIn("mktemp -d", seen_commands[2][-1])
+            self.assertIn("trap 'rm -rf \"\\$workdir\"' EXIT", seen_commands[2][-1])
+            self.assertIn("Neovim sandbox verify succeeded via wsl", result.details)
+
+    def test_verify_fails_when_sandbox_is_requested_without_backend(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            source_dir = Path(temp_dir) / "nvim"
+            source_dir.mkdir(parents=True, exist_ok=True)
+            (source_dir / "init.lua").write_text("print('hello')\n", encoding="utf-8")
+
+            module = NeovimModule(
+                PROJECT_ROOT,
+                platform_name="linux",
+                config_source_dir=source_dir,
+                config_destination_dir=source_dir,
+                command_exists_fn=lambda command: command in {"nvim", "lua"},
+                apt_available_fn=lambda: True,
+                run_fn=lambda command, *, cwd=None, env=None: SimpleNamespace(returncode=0, stdout="", stderr=""),
+            )
+
+            result = module.verify(sandbox=True)
+
+            self.assertFalse(result.ready)
+            self.assertIn("sandbox verify requested but no supported backend is available", result.details)
 
     def test_apply_clones_remote_config_using_repo_url_getter(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
