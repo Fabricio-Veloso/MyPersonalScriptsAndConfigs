@@ -13,9 +13,14 @@ def build_parser() -> argparse.ArgumentParser:
     for command_name in ("plan", "apply", "check", "verify"):
         command_parser = subparsers.add_parser(command_name)
         command_parser.add_argument("--profile", default="full")
+        if command_name == "verify":
+            command_parser.add_argument("--sandbox", action="store_true")
 
     configure_user_parser = subparsers.add_parser("configure-user")
     configure_user_parser.add_argument("--name")
+
+    configure_neovim_parser = subparsers.add_parser("configure-neovim")
+    configure_neovim_parser.add_argument("--repo-url")
 
     return parser
 
@@ -36,6 +41,7 @@ def print_menu() -> None:
     print("3. Apply")
     print("4. Check")
     print("5. Verify")
+    print("6. Configure Neovim repo")
     print("0. Exit")
 
 
@@ -89,6 +95,16 @@ def run_interactive_menu(app, input_func: Callable[[str], str] | None = None) ->
                 print(f"Erro ao executar verify: {exc}")
             continue
 
+        if choice == "6":
+            repo_url = input_func("Digite a URL do repo da configuracao do Neovim: ").strip()
+            if not repo_url:
+                print("URL invalida. Tente novamente.")
+                continue
+            saved_path = app.configure_neovim_repo_url(repo_url)
+            print(f"neovim repo saved: {repo_url}")
+            print(f"settings file: {saved_path}")
+            continue
+
         print("Opcao invalida. Tente novamente.")
 
 
@@ -116,7 +132,7 @@ def main() -> int:
         return 0
 
     if args.command == "verify":
-        result = app.verify(args.profile)
+        result = app.verify(args.profile, sandbox=args.sandbox)
         print(result.to_text())
         return 0
 
@@ -124,6 +140,15 @@ def main() -> int:
         user_name = args.name or prompt_user_name()
         saved_path = app.configure_user_name(user_name)
         print(f"user name saved: {user_name}")
+        print(f"settings file: {saved_path}")
+        return 0
+
+    if args.command == "configure-neovim":
+        repo_url = args.repo_url
+        if not repo_url:
+            parser.error("configure-neovim requires --repo-url")
+        saved_path = app.configure_neovim_repo_url(repo_url)
+        print(f"neovim repo saved: {repo_url}")
         print(f"settings file: {saved_path}")
         return 0
 

@@ -49,6 +49,26 @@ class CliMenuTest(unittest.TestCase):
         self.assertEqual(exit_code, 0)
         self.assertIn("Erro ao executar apply: boom", output.getvalue())
 
+    def test_interactive_menu_configures_neovim_repo_and_exits(self) -> None:
+        class FakeApp:
+            def __init__(self) -> None:
+                self.saved_repo_url = None
+
+            def configure_neovim_repo_url(self, repo_url: str):
+                self.saved_repo_url = repo_url
+                return PROJECT_ROOT / ".local" / "user_settings.json"
+
+        app = FakeApp()
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            with patch("builtins.input", side_effect=["6", "https://github.com/Fabricio-Veloso/NvimConfig", "0"]):
+                exit_code = run_interactive_menu(app)
+
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(app.saved_repo_url, "https://github.com/Fabricio-Veloso/NvimConfig")
+        self.assertIn("Configure Neovim repo", output.getvalue())
+
 
 if __name__ == "__main__":
     unittest.main()
