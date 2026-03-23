@@ -69,5 +69,5 @@ class ProjectFoldersModule(BaseModule):
             raise RuntimeError("User name must be configured before applying project_folders on Windows")
         path.mkdir(parents=True, exist_ok=True)
 
-    def verify(self) -> CheckResult:
+    def verify(self, *, sandbox: bool = False) -> CheckResult:
         return self.check()

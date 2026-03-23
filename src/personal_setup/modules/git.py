@@ -25,5 +25,5 @@ class GitModule(BaseModule):
     def apply(self) -> None:
         return None
 
-    def verify(self) -> CheckResult:
+    def verify(self, *, sandbox: bool = False) -> CheckResult:
         return self.check()

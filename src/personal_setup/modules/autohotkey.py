@@ -117,5 +117,5 @@ class AutoHotkeyModule(BaseModule):
         self.copy_file_fn(self._config_source(), destination)
         self.copy_file_fn(self._config_source(), self._startup_script_destination())
 
-    def verify(self) -> CheckResult:
+    def verify(self, *, sandbox: bool = False) -> CheckResult:
         return self.check()

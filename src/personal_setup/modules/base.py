@@ -25,5 +25,5 @@ class BaseModule(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def verify(self) -> CheckResult:
+    def verify(self, *, sandbox: bool = False) -> CheckResult:
         raise NotImplementedError

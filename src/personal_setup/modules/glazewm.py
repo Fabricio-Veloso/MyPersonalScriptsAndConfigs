@@ -123,5 +123,5 @@ class GlazeWMModule(BaseModule):
         if getattr(shortcut_result, "returncode", 0) != 0 and not self._startup_matches():
             raise RuntimeError("failed to create GlazeWM startup shortcut")
 
-    def verify(self) -> CheckResult:
+    def verify(self, *, sandbox: bool = False) -> CheckResult:
         return self.check()

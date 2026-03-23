@@ -9,13 +9,13 @@ class Verifier:
         self.profile_loader = profile_loader
         self.module_registry = module_registry
 
-    def verify(self, profile_name: str) -> PlanResult:
+    def verify(self, profile_name: str, *, sandbox: bool = False) -> PlanResult:
         platform_name = detect_platform()
         profile = self.profile_loader.load(profile_name)
         steps: list[PlanStep] = []
 
         for module_name in profile.modules:
-            result = self.module_registry[module_name].verify()
+            result = self.module_registry[module_name].verify(sandbox=sandbox)
             action = "verified" if result.ready else "failed"
             steps.append(PlanStep(module_name, action, result.details or result.status_label))
 
